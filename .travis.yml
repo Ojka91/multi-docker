@@ -1,0 +1,25 @@
+sudo: required
+services: 
+  - docker
+
+before_install:
+  - docker build -t oscar/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run oscar/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t oscar/multi-client ./client
+  - docker build -t oscar/multi-nginx ./nginx
+  - docker build -t oscar/multi-server ./server
+  - docker build -t oscar/multi-worker ./workerdocker login
+  # Login in to docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Push images to docker hub
+  - docker push oscar/multi-client
+  - docker push oscar/multi-nginx
+  - docker push oscar/multi-server
+  - docker push oscar/multi-worker
+
+
+
